@@ -64,18 +64,29 @@ class Excel:
         return df
 
 class Google:
+    def __init__(self):
+        pass
+
     def googleStorageConnect(self,project,json_auth):    
             conn = storage.Client.from_service_account_json(json_auth)
             bucket = conn.get_bucket(project)    
             return bucket   
 
-    def storageFileUpload(project,json_auth,storage,file):
+    def storageFileUpload(self,project,json_auth,storage,file):
         stg   = Google().googleStorageConnect(project,json_auth)
         stg   = stg.blob(storage)    
         stg.upload_from_filename(file)
         return stg.public_url
 
-    def storageFileExists(project,json_auth,storage):
+    def storageFileExists(self,project,json_auth,storage):
         stg = Google().googleStorageConnect(project,json_auth)
         result = stg.get_blob(storage)
         return result
+
+class File:
+    def __init__(self):
+        pass
+
+    def createParque(self, df,dir):    
+        df.to_parquet(dir, engine='pyarrow', compression='gzip')
+        
