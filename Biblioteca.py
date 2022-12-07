@@ -10,7 +10,7 @@ import glob
 import datetime
 
 #Google
-from google.cloud import storage
+from google.cloud import storage, bigquery
 
 class Database:
     def __init__(self):
@@ -82,6 +82,19 @@ class Google:
         stg = Google().googleStorageConnect(project,json_auth)
         result = stg.get_blob(storage)
         return result
+
+    def bigqueryInsert(project,json_auth,project_dataset_table,url_file,is_increment,schema):
+        bq  = Google().googleBigQueryConnect(json_auth)
+        job_config = bigquery.LoadJobConfig()
+        job_config.source_format = bigquery.SourceFormat.PARQUET
+        job_config.autodetect = True
+        job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND            
+        
+        load_job = bq.load_table_from_uri(
+            url_file, project_dataset_table, job_config=job_config        
+        )  
+        results = load_job.result()        
+        return results
 
 class File:
     def __init__(self):
