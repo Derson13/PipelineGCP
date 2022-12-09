@@ -52,7 +52,7 @@ class Excel:
     def __init__(self):
         pass
         
-    def getExcel(self, dir_excel):
+    def getExcel(dir_excel):
         df = pd.DataFrame()
         lista = glob.glob(dir_excel, recursive=True)
 
@@ -66,24 +66,28 @@ class Excel:
 class Google:
     def __init__(self):
         pass
+    
+    def googleBigQueryConnect(self,json_auth):    
+        conn = bigquery.Client.from_service_account_json(json_auth)
+        return conn
 
     def googleStorageConnect(self,project,json_auth):    
             conn = storage.Client.from_service_account_json(json_auth)
             bucket = conn.get_bucket(project)    
             return bucket   
 
-    def storageFileUpload(self,project,json_auth,storage,file):
+    def storageFileUpload(project,json_auth,storage,file):
         stg   = Google().googleStorageConnect(project,json_auth)
         stg   = stg.blob(storage)    
         stg.upload_from_filename(file)
         return stg.public_url
 
-    def storageFileExists(self,project,json_auth,storage):
+    def storageFileExists(project,json_auth,storage):
         stg = Google().googleStorageConnect(project,json_auth)
         result = stg.get_blob(storage)
         return result
 
-    def bigqueryInsert(project,json_auth,project_dataset_table,url_file,is_increment,schema):
+    def bigqueryInsert(project,json_auth,project_dataset_table,url_file):
         bq  = Google().googleBigQueryConnect(json_auth)
         job_config = bigquery.LoadJobConfig()
         job_config.source_format = bigquery.SourceFormat.PARQUET

@@ -7,7 +7,8 @@ YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 #[START variaveis env]
 GCP_PROJECT_ID = getenv("GCP_PROJECT_ID","boticario-prd")
-BQ_DATASET_NAME = getenv("BQ_DATASET_NAME","Ecommerce")
+BQ_DATASETECOMMER_NAME = getenv("BQ_DATASETECOMMER_NAME","Ecommerce")
+BQ_DATASETTWITTER_NAME = getenv("BQ_DATASETTWITTER_NAME","Twitter")
 BQ_TABLE_NAME = getenv("BQ_TABLE_NAME","tbl_vendas")
 CONN_ID = getenv("CONN_ID","cnx-composer-bi")
 #[END variaveis env]
@@ -35,9 +36,14 @@ with DAG(
 
 #[START Tarefas]
 
-    bq_create_dataset = BigQueryCreateEmptyDatasetOperator(
-        task_id= "bq_create_dataset",
-        dataset_id=BQ_DATASET_NAME,
+    bq_create_dataset_Ecommerce = BigQueryCreateEmptyDatasetOperator(
+        task_id= "bq_create_dataset_Ecommerce",
+        dataset_id=BQ_DATASETECOMMER_NAME,
+        gcp_conn_id=CONN_ID
+    )
+    bq_create_dataset_Twitter = BigQueryCreateEmptyDatasetOperator(
+        task_id= "bq_create_dataset_Twitter",
+        dataset_id=BQ_DATASETTWITTER_NAME,
         gcp_conn_id=CONN_ID
     )
     gcs_parquet_to_bq = BigQueryInsertJobOperator(
@@ -49,7 +55,7 @@ with DAG(
                 "createDisposition": "CREATE_IF_NEEDED",
                 "destinationTable": {
                     "projectId": GCP_PROJECT_ID,
-                    "datasetId": BQ_DATASET_NAME,
+                    "datasetId": BQ_DATASETECOMMER_NAME,
                     "tableId": BQ_TABLE_NAME,
                 },
                 "sourceUris": [f"gs://boticario-prd/Parquet/vendas.parquet"],
@@ -60,7 +66,7 @@ with DAG(
 
     check_bq_tb_count = BigQueryCheckOperator(
         task_id="check_bq_tb_count",
-        sql=f"SELECT COUNT(*) FROM {BQ_DATASET_NAME}.{BQ_TABLE_NAME}",
+        sql=f"SELECT COUNT(*) FROM {BQ_DATASETECOMMER_NAME}.{BQ_TABLE_NAME}",
         use_legacy_sql=False,
         location="us",
         gcp_conn_id=CONN_ID                
@@ -132,5 +138,5 @@ with DAG(
 #[END Tarefas]
 
 #[START Execução das Tarefas]
-bq_create_dataset >> gcs_parquet_to_bq >> check_bq_tb_count >> [create_table_fato_vendas_ano_mes,create_table_fato_vendas_marca_linha,create_table_fato_vendas_marca_ano_mes,create_table_fato_vendas_linha_ano_mes]
+[bq_create_dataset_Ecommerce,bq_create_dataset_Twitter] >> gcs_parquet_to_bq >> check_bq_tb_count >> [create_table_fato_vendas_ano_mes,create_table_fato_vendas_marca_linha,create_table_fato_vendas_marca_ano_mes,create_table_fato_vendas_linha_ano_mes]
 #[END Execução das Tarefas]

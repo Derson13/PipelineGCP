@@ -1,46 +1,47 @@
 from getKeys import Keys
-from Biblioteca import File as pq
-from Biblioteca import Google as gs
+import Biblioteca as bb
 from Biblioteca import Excel as ex
-from Biblioteca import Database as db
+from Biblioteca import Google as gs
 
-#excel/sql/parquet
-table = 'Vendas'
-dir_excel='./ArquivosExcel/*.xlsx'
-#parquet
-nm_file = 'vendas.parquet'
-parquet = '.\{}'.format(nm_file)
-#storage
-project = 'boticario-prd'
-storage = 'Parquet/'
-json_auth = Keys.getJsonGCP()
+class ETL:
+    def __init__(self):
+        
+        self.db = bb.Database()
+        self.pq = bb.File()        
+        self.table = 'Vendas'
+        self.dir_excel='./ArquivosExcel/*.xlsx'
+        self.nm_file = 'vendas.parquet'
+        self.parquet = '.\{}'.format(self.nm_file)
+        self.project = 'boticario-prd'
+        self.storage = 'Parquet/'
+        self.json_auth = Keys.getJsonGCP()
+        
+        
+    def excelToSql(self):                
+        df = ex.getExcel(self.dir_excel)
+        self.db.sqlSet(df,self.table)
+        print('Fase 1: Planilhas carregadas e inseridas no SQL com sucesso!')
 
+    def getSqlToDf(self):
+        df = self.db.sqlGet("SELECT * FROM {} WITH(NOLOCK)".format(self.table))
+        print('Fase 2: Consulta aos dados no SQL realizada com sucesso!')
+        return df
 
-def excelToSql():
-    df = ex.getExcel(dir_excel=dir_excel)
-    db.sqlSet(df=df,table=table)
-    print('Fase 1: Planilhas carregadas e inseridas no SQL com sucesso!')
+    def dfToParquet(self, df):
+        self.pq.createParque(df, self.parquet)
+        print('Fase 3: Arquivo parquet gerado localmente com sucesso!')
 
-def getSqlToDf():
-    df = db.sqlGet("SELECT * FROM {} WITH(NOLOCK)".format(table))
-    print('Fase 2: Consulta aos dados no SQL realizada com sucesso!')
-    return df
+    def fileToStorage(self):
+        result = gs.storageFileUpload(
+                             project   = self.project
+                            ,json_auth = self.json_auth
+                            ,storage   = self.storage + self.nm_file
+                            ,file      = self.nm_file
+                            )
 
-def dfToParquet(df):
-    pq.createParque(df=df, dir=parquet)
-    print('Fase 3: Arquivo parquet gerado localmente com sucesso!')
+        print('Fase 4: Arquivo parquet enviado ao Storage com sucesso!')
 
-def fileToStorage(parquet):
-    result = gs.storageFileUpload(
-                         project   = project
-                        ,json_auth = json_auth
-                        ,storage   = storage + nm_file
-                        ,file      = nm_file
-                        )
-
-    print('Fase 4: Arquivo parquet enviado ao Storage com sucesso!')
-
-excelToSql()
-df = getSqlToDf()
-dfToParquet(df=df)    
-fileToStorage(parquet=parquet)
+ETL().excelToSql()
+df = ETL().getSqlToDf()
+ETL().dfToParquet(df=df)    
+ETL().fileToStorage()

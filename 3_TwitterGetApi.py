@@ -1,13 +1,14 @@
 import json
 import requests
 import pandas as pd
-from Biblioteca import File as pq
+import Biblioteca as bb
 from Biblioteca import Google as gc
 from getKeys import Keys
 
 class TwitterApi:
     def __init__(self):
-        self.bearer = "Bearer " + Keys.getApiKey()
+        self.pq      = bb.File()
+        self.bearer  = "Bearer " + Keys.getApiKey()
         self.headers = {"Authorization": self.bearer}
         self.nm_file = 'twitter.parquet'
         self.parquet = '.\{}'.format(self.nm_file)        
@@ -43,7 +44,7 @@ class TwitterApi:
         return dfUsers
 
     def dfToParquet(self, df):
-        pq.createParque(df=df, dir=self.parquet)
+        self.pq.createParque(df=df, dir=self.parquet)
         
     def fileToStorage(self):
         result = gc.storageFileUpload(
@@ -55,9 +56,16 @@ class TwitterApi:
 
     def getTwitterToGCP(self):
         dfTweets = TwitterApi().getTweets()
+        print('Fase 1: Busca de Tweets realizada com sucesso!')
         dfUsers  = TwitterApi().getUsers(dfTweets)
+        print('Fase 2: Busca de Usuarios realizada com sucesso!')
         df = pd.merge(left=dfTweets, right=dfUsers, how='left',left_on='author_id',right_on='id')
+        print('Fase 3: Merge das informações realizada com sucesso!')
         TwitterApi().dfToParquet(df)
+        print('Fase 4: Arquivo parquet gerado com sucesso!')
+        TwitterApi().fileToStorage()
+        print('Fase 5: Parquet importado no Storage com sucesso!')
         gc.bigqueryInsert(self.project, self.json_auth, self.proj_dat_table, self.url_file)
+        print('Fase 6: Dados inseridos no Big Query com sucesso!')
 
 TwitterApi().getTwitterToGCP()
