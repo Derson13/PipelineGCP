@@ -44,4 +44,4 @@ class ETL:
 ETL().excelToSql()
 df = ETL().getSqlToDf()
 ETL().dfToParquet(df=df)    
-ETL().fileToStorage()
+#ETL().fileToStorage()
