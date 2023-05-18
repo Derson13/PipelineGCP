@@ -23,7 +23,7 @@ class ETL:
         print('Fase 1: Planilhas carregadas e inseridas no SQL com sucesso!')
 
     def getSqlToDf(self):
-        df = self.db.sqlGet("SELECT * FROM {} WITH(NOLOCK)".format(self.table))
+        df = self.db.sqlGet("SELECT DISTINCT * FROM {} WITH(NOLOCK)".format(self.table))
         print('Fase 2: Consulta aos dados no SQL realizada com sucesso!')
         return df
 
