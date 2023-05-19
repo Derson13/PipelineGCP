@@ -118,5 +118,5 @@ class File:
         pass
 
     def createParque(self, df,dir):    
-        df.to_parquet(dir, engine='pyarrow', compression='gzip')
+        df.to_parquet(dir, engine='pyarrow', compression='gzip') 
         

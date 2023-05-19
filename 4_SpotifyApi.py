@@ -140,4 +140,4 @@ class SpotifyApi:
 
         print('### Tabela Spotify All Data Hackers ###')
 
-SpotifyApi().getSpotifyToGCP()
+SpotifyApi().getSpotifyToGCP() 

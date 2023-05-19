@@ -9,6 +9,7 @@ YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 GCP_PROJECT_ID = getenv("GCP_PROJECT_ID","boticario-prd-srv")
 BQ_DATASETECOMMER_NAME = getenv("BQ_DATASETECOMMER_NAME","Ecommerce")
 BQ_DATASETTWITTER_NAME = getenv("BQ_DATASETTWITTER_NAME","Twitter")
+BQ_DATASETSPOTIFY_NAME = getenv("BQ_DATASETSPOTIFY_NAME","Spotify")
 BQ_TABLE_NAME = getenv("BQ_TABLE_NAME","tbl_vendas")
 CONN_ID = getenv("CONN_ID","cnx-composer-bi")
 #[END variaveis env]
@@ -44,6 +45,11 @@ with DAG(
     bq_create_dataset_Twitter = BigQueryCreateEmptyDatasetOperator(
         task_id= "bq_create_dataset_Twitter",
         dataset_id=BQ_DATASETTWITTER_NAME,
+        gcp_conn_id=CONN_ID
+    )
+    bq_create_dataset_Spotify = BigQueryCreateEmptyDatasetOperator(
+        task_id= "bq_create_dataset_Spotify",
+        dataset_id=BQ_DATASETSPOTIFY_NAME,
         gcp_conn_id=CONN_ID
     )
     gcs_parquet_to_bq = BigQueryInsertJobOperator(
@@ -138,5 +144,5 @@ with DAG(
 #[END Tarefas]
 
 #[START Execução das Tarefas]
-[bq_create_dataset_Ecommerce,bq_create_dataset_Twitter] >> gcs_parquet_to_bq >> check_bq_tb_count >> [create_table_fato_vendas_ano_mes,create_table_fato_vendas_marca_linha,create_table_fato_vendas_marca_ano_mes,create_table_fato_vendas_linha_ano_mes]
+[bq_create_dataset_Ecommerce,bq_create_dataset_Twitter,bq_create_dataset_Spotify] >> gcs_parquet_to_bq >> check_bq_tb_count >> [create_table_fato_vendas_ano_mes,create_table_fato_vendas_marca_linha,create_table_fato_vendas_marca_ano_mes,create_table_fato_vendas_linha_ano_mes]
 #[END Execução das Tarefas]

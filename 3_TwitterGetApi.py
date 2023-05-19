@@ -68,4 +68,4 @@ class TwitterApi:
         gc.bigqueryInsert(self.project, self.json_auth, self.proj_dat_table, self.url_file, False)
         print('Fase 6: Dados inseridos no Big Query com sucesso!')
 
-TwitterApi().getTwitterToGCP()
+TwitterApi().getTwitterToGCP() 
