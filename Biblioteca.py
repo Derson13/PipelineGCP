@@ -87,13 +87,26 @@ class Google:
         result = stg.get_blob(storage)
         return result
 
-    def bigqueryInsert(project,json_auth,project_dataset_table,url_file):
+    def bqQuery(json_auth,query):
+        bq  = Google().googleBigQueryConnect(json_auth)
+        result = bq.query(query).result()
+        return result
+
+    def bigqueryInsert(project,json_auth,project_dataset_table,url_file,is_increment):
         bq  = Google().googleBigQueryConnect(json_auth)
         job_config = bigquery.LoadJobConfig()
         job_config.source_format = bigquery.SourceFormat.PARQUET
         job_config.autodetect = True
-        job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND            
         
+        if is_increment: job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND            
+        else: job_config.write_disposition = bigquery.WriteDisposition.WRITE_TRUNCATE
+
+        if is_increment:
+            job_config.schema_update_options=[
+                bigquery.SchemaUpdateOption.ALLOW_FIELD_ADDITION,
+                bigquery.SchemaUpdateOption.ALLOW_FIELD_RELAXATION
+            ]
+
         load_job = bq.load_table_from_uri(
             url_file, project_dataset_table, job_config=job_config        
         )  

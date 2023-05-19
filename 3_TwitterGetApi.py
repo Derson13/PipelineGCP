@@ -12,7 +12,7 @@ class TwitterApi:
         self.headers = {"Authorization": self.bearer}
         self.nm_file = 'twitter.parquet'
         self.parquet = '.\{}'.format(self.nm_file)        
-        self.project = 'boticario-prd'
+        self.project = 'boticario-prd-srv'
         self.dataset = 'Twitter'
         self.table   = 'tbl_twitter'        
         self.storage = 'Parquet/'
@@ -63,9 +63,9 @@ class TwitterApi:
         print('Fase 3: Merge das informações realizada com sucesso!')
         TwitterApi().dfToParquet(df)
         print('Fase 4: Arquivo parquet gerado com sucesso!')
-        #TwitterApi().fileToStorage()
-        #print('Fase 5: Parquet importado no Storage com sucesso!')
-        #gc.bigqueryInsert(self.project, self.json_auth, self.proj_dat_table, self.url_file)
-        #print('Fase 6: Dados inseridos no Big Query com sucesso!')
+        TwitterApi().fileToStorage()
+        print('Fase 5: Parquet importado no Storage com sucesso!')
+        gc.bigqueryInsert(self.project, self.json_auth, self.proj_dat_table, self.url_file, False)
+        print('Fase 6: Dados inseridos no Big Query com sucesso!')
 
 TwitterApi().getTwitterToGCP()

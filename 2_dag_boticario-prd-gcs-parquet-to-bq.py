@@ -6,7 +6,7 @@ from airflow.providers.google.cloud.operators.bigquery import BigQueryCreateEmpt
 YESTERDAY = datetime.datetime.now() - datetime.timedelta(days=1)
 
 #[START variaveis env]
-GCP_PROJECT_ID = getenv("GCP_PROJECT_ID","boticario-prd")
+GCP_PROJECT_ID = getenv("GCP_PROJECT_ID","boticario-prd-srv")
 BQ_DATASETECOMMER_NAME = getenv("BQ_DATASETECOMMER_NAME","Ecommerce")
 BQ_DATASETTWITTER_NAME = getenv("BQ_DATASETTWITTER_NAME","Twitter")
 BQ_TABLE_NAME = getenv("BQ_TABLE_NAME","tbl_vendas")
@@ -17,8 +17,8 @@ CONN_ID = getenv("CONN_ID","cnx-composer-bi")
 default_args = {
     'owner': 'Anderson Henrique Rodrigues',
     'depends_on_past': False,
-    'email': ['andersonhrodrigues@yahoo.com.br'],
-    'email_on_failure': ['andersonhrodrigues@yahoo.com.br'],
+    'email': ['andersonhrodrigues@gmail.com'],
+    'email_on_failure': ['andersonhrodrigues@gmail.com'],
     'email_on_retry': False,
     'retries': 1,
     'retry_delay': datetime.timedelta(seconds=15),
@@ -58,7 +58,7 @@ with DAG(
                     "datasetId": BQ_DATASETECOMMER_NAME,
                     "tableId": BQ_TABLE_NAME,
                 },
-                "sourceUris": [f"gs://boticario-prd/Parquet/vendas.parquet"],
+                "sourceUris": [f"gs://boticario-prd-srv/Parquet/vendas.parquet"],
                 "sourceFormat": "PARQUET",
             }
         },
@@ -75,21 +75,21 @@ with DAG(
     create_table_fato_vendas_ano_mes = BigQueryExecuteQueryOperator(
         task_id="create_table_fato_vendas_ano_mes", 
         sql="""
-                CREATE OR REPLACE TABLE `boticario-prd.Ecommerce.fato_vendas_ano_mes`
+                CREATE OR REPLACE TABLE `boticario-prd-srv.Ecommerce.fato_vendas_ano_mes`
                 AS
 
                 SELECT 
                  CAST(EXTRACT(YEAR FROM DATA_VENDA) AS STRING) AS Ano
                 ,RIGHT(CONCAT('00',EXTRACT(MONTH FROM DATA_VENDA)),2) AS Mes
                 ,SUM(QTD_VENDA) AS QtdeVenda
-                FROM `boticario-prd.Ecommerce.tbl_vendas`
+                FROM `boticario-prd-srv.Ecommerce.tbl_vendas`
                 GROUP BY 1,2""", 
         use_legacy_sql=False
     )
     create_table_fato_vendas_marca_linha = BigQueryExecuteQueryOperator(
         task_id="create_table_fato_vendas_marca_linha", 
         sql="""
-                CREATE OR REPLACE TABLE `boticario-prd.Ecommerce.fato_vendas_marca_linha`
+                CREATE OR REPLACE TABLE `boticario-prd-srv.Ecommerce.fato_vendas_marca_linha`
                 AS
 
                 SELECT 
@@ -98,14 +98,14 @@ with DAG(
                 ,ID_LINHA AS IdLinha
                 ,LINHA AS Linha
                 ,SUM(QTD_VENDA) AS QtdeVenda
-                FROM `boticario-prd.Ecommerce.tbl_vendas`
+                FROM `boticario-prd-srv.Ecommerce.tbl_vendas`
                 GROUP BY 1,2,3,4""", 
         use_legacy_sql=False
     )
     create_table_fato_vendas_marca_ano_mes = BigQueryExecuteQueryOperator(
         task_id="create_table_fato_vendas_marca_ano_mes", 
         sql="""
-                CREATE OR REPLACE TABLE `boticario-prd.Ecommerce.fato_vendas_marca_ano_mes`
+                CREATE OR REPLACE TABLE `boticario-prd-srv.Ecommerce.fato_vendas_marca_ano_mes`
                 AS
 
                 SELECT 
@@ -114,14 +114,14 @@ with DAG(
                 ,ID_MARCA AS IdMarca
                 ,MARCA AS Marca
                 ,SUM(QTD_VENDA) AS QtdeVenda
-                FROM `boticario-prd.Ecommerce.tbl_vendas`
+                FROM `boticario-prd-srv.Ecommerce.tbl_vendas`
                 GROUP BY 1,2,3,4""", 
         use_legacy_sql=False
     )
     create_table_fato_vendas_linha_ano_mes = BigQueryExecuteQueryOperator(
         task_id="create_table_fato_vendas_linha_ano_mes", 
         sql="""
-                CREATE OR REPLACE TABLE `boticario-prd.Ecommerce.fato_vendas_linha_ano_mes`
+                CREATE OR REPLACE TABLE `boticario-prd-srv.Ecommerce.fato_vendas_linha_ano_mes`
                 AS
 
                 SELECT 
@@ -130,7 +130,7 @@ with DAG(
                 ,ID_LINHA AS IdLinha
                 ,LINHA AS Linha
                 ,SUM(QTD_VENDA) AS QtdeVenda
-                FROM `boticario-prd.Ecommerce.tbl_vendas`
+                FROM `boticario-prd-srv.Ecommerce.tbl_vendas`
                 GROUP BY 1,2,3,4""", 
         use_legacy_sql=False
     )

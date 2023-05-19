@@ -2,6 +2,8 @@ from getKeys import Keys
 import Biblioteca as bb
 from Biblioteca import Excel as ex
 from Biblioteca import Google as gs
+import warnings
+warnings.filterwarnings('ignore')
 
 class ETL:
     def __init__(self):
@@ -12,7 +14,7 @@ class ETL:
         self.dir_excel='./ArquivosExcel/*.xlsx'
         self.nm_file = 'vendas.parquet'
         self.parquet = '.\{}'.format(self.nm_file)
-        self.project = 'boticario-prd'
+        self.project = 'boticario-prd-srv'
         self.storage = 'Parquet/'
         self.json_auth = Keys.getJsonGCP()
         
@@ -44,4 +46,4 @@ class ETL:
 ETL().excelToSql()
 df = ETL().getSqlToDf()
 ETL().dfToParquet(df=df)    
-#ETL().fileToStorage()
+ETL().fileToStorage()
