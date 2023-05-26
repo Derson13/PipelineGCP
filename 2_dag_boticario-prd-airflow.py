@@ -27,7 +27,7 @@ default_args = {
 }
 
 with DAG(
-    dag_id="boticario-prd-gcs-parquet-to-bq",
+    dag_id="dag-boti-parquet-to-bq",
     tags=['dev', 'storage', 'parquet', 'big query'],
     default_args=default_args,
     schedule_interval=datetime.timedelta(days=1),
@@ -37,21 +37,30 @@ with DAG(
 
 #[START Tarefas]
 
-    bq_create_dataset_Ecommerce = BigQueryCreateEmptyDatasetOperator(
-        task_id= "bq_create_dataset_Ecommerce",
-        dataset_id=BQ_DATASETECOMMER_NAME,
-        gcp_conn_id=CONN_ID
+    
+    bq_create_dataset_Ecommerce = BigQueryExecuteQueryOperator(
+        task_id="bq_create_dataset_Ecommerce",
+        sql=f"CREATE SCHEMA IF NOT EXISTS `{GCP_PROJECT_ID}.{BQ_DATASETECOMMER_NAME}`",
+        use_legacy_sql=False,
+        gcp_conn_id=CONN_ID,
+        trigger_rule='none_failed'
     )
-    bq_create_dataset_Twitter = BigQueryCreateEmptyDatasetOperator(
-        task_id= "bq_create_dataset_Twitter",
-        dataset_id=BQ_DATASETTWITTER_NAME,
-        gcp_conn_id=CONN_ID
+    bq_create_dataset_Twitter = BigQueryExecuteQueryOperator(
+        task_id="bq_create_dataset_Twitter",
+        sql=f"CREATE SCHEMA IF NOT EXISTS `{GCP_PROJECT_ID}.{BQ_DATASETTWITTER_NAME}`",
+        use_legacy_sql=False,
+        gcp_conn_id=CONN_ID,
+        trigger_rule='none_failed'
     )
-    bq_create_dataset_Spotify = BigQueryCreateEmptyDatasetOperator(
-        task_id= "bq_create_dataset_Spotify",
-        dataset_id=BQ_DATASETSPOTIFY_NAME,
-        gcp_conn_id=CONN_ID
+
+    bq_create_dataset_Spotify = BigQueryExecuteQueryOperator(
+        task_id="bq_create_dataset_Spotify",
+        sql=f"CREATE SCHEMA IF NOT EXISTS `{GCP_PROJECT_ID}.{BQ_DATASETSPOTIFY_NAME}`",
+        use_legacy_sql=False,
+        gcp_conn_id=CONN_ID,
+        trigger_rule='none_failed'
     )
+
     gcs_parquet_to_bq = BigQueryInsertJobOperator(
         task_id="gcs_parquet_to_bq",
         gcp_conn_id=CONN_ID,
