@@ -52,7 +52,6 @@ def run():
         vendas_data | 'Write to BigQuery' >> beam.io.WriteToBigQuery(
             table=table_ref.table_id,
             dataset=table_ref.dataset_id,
-            project=PROJECT_ID,
             create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
             write_disposition=beam.io.BigQueryDisposition.WRITE_TRUNCATE if table_exists else beam.io.BigQueryDisposition.WRITE_APPEND
         )
@@ -62,13 +61,3 @@ if __name__ == '__main__':
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./json_gcs.json"  # Caminho para o arquivo de credenciais JSON
     
     run()
-    
-    # Gera o template do Dataflow
-    options = {
-        'project': PROJECT_ID,
-        'staging_location': f'gs://{BUCKET_NAME}/staging',
-        'template_location': TEMPLATE_LOCATION,
-        'temp_location': f'gs://{BUCKET_NAME}/temp',
-        'region': 'us-central1'
-    }
-    beam.runners.DataflowRunner().run(run, **options)
